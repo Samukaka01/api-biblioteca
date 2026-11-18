@@ -1,14 +1,12 @@
-package com.biblioteca.api.repositorys;
+package com.biblioteca.api.repositorys.livro;
 
-import com.biblioteca.api.model.LivroModel;
+import com.biblioteca.api.models.livro.LivroModel;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
@@ -31,7 +29,7 @@ public class LivroRepositoryEmMemoria implements LivroRepository {
     public Optional<LivroModel> findByIsbn(String isbn){
         return dados.values()
                 .stream()
-                .filter(l -> l.getIsbn().equals(isbn))
+                .filter(livro -> livro.getIsbn().equals(isbn))
                 .findFirst();
     }
 

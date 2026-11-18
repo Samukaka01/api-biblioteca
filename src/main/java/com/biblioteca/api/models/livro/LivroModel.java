@@ -1,4 +1,4 @@
-package com.biblioteca.api.model;
+package com.biblioteca.api.models.livro;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

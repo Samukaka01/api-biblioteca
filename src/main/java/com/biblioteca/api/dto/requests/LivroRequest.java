@@ -1,4 +1,4 @@
-package com.biblioteca.api.dto.request;
+package com.biblioteca.api.dto.requests;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

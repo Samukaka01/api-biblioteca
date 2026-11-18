@@ -1,7 +1,7 @@
 package com.biblioteca.api.controllers;
 
-import com.biblioteca.api.dto.request.LivroRequest;
-import com.biblioteca.api.dto.response.LivroResponse;
+import com.biblioteca.api.dto.requests.LivroRequest;
+import com.biblioteca.api.dto.responses.LivroResponse;
 import com.biblioteca.api.services.LivroService;
 
 import jakarta.validation.Valid;

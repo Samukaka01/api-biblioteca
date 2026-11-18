@@ -1,6 +1,6 @@
-package com.biblioteca.api.dto.response;
+package com.biblioteca.api.dto.responses;
 
-import com.biblioteca.api.model.LivroModel;
+import com.biblioteca.api.models.livro.LivroModel;
 
 public record LivroResponse(
         Long id,

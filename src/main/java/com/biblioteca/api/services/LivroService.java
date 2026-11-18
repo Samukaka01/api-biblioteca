@@ -1,13 +1,12 @@
 package com.biblioteca.api.services;
 
-import com.biblioteca.api.dto.request.LivroRequest;
-import com.biblioteca.api.dto.response.LivroResponse;
-import com.biblioteca.api.model.LivroModel;
-import com.biblioteca.api.repositorys.LivroRepository;
+import com.biblioteca.api.dto.requests.LivroRequest;
+import com.biblioteca.api.dto.responses.LivroResponse;
+import com.biblioteca.api.models.livro.LivroModel;
+import com.biblioteca.api.repositorys.livro.LivroRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service

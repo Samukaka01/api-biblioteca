@@ -1,6 +1,6 @@
-package com.biblioteca.api.repositorys;
+package com.biblioteca.api.repositorys.livro;
 
-import com.biblioteca.api.model.LivroModel;
+import com.biblioteca.api.models.livro.LivroModel;
 import java.util.List;
 import java.util.Optional;
 

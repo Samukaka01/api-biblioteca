@@ -46,10 +46,10 @@ public class LivroController {
     }
 
     @PutMapping("/{id}")
-    public LivroResponse atualizar(
+    public ResponseEntity<LivroResponse> atualizar(
             @PathVariable Long id,
-            @RequestBody LivroRequest livroRequest){
-        return livroService.atualizar(id, livroRequest);
+            @Valid @RequestBody LivroRequest livroRequest){
+        return ResponseEntity.ok(livroService.atualizar(id, livroRequest));
     }
 
     @DeleteMapping("/{id}")

@@ -4,6 +4,7 @@ import com.biblioteca.api.dto.requests.LivroRequest;
 import com.biblioteca.api.dto.responses.LivroResponse;
 import com.biblioteca.api.models.livro.LivroModel;
 import com.biblioteca.api.repositorys.livro.LivroRepository;
+import com.biblioteca.api.repositorys.emprestimo.EmprestimoRepository;
 import com.biblioteca.api.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -14,22 +15,25 @@ import java.util.Optional;
 public class LivroService {
 
     private final LivroRepository repository;
+    private final EmprestimoRepository emprestimoRepository;
 
-    public LivroService(LivroRepository repository) {
+    public LivroService(LivroRepository repository, EmprestimoRepository emprestimoRepository) {
         this.repository = repository;
+        this.emprestimoRepository = emprestimoRepository;
     }
 
     public List<LivroResponse> listar(String autor, Boolean disponivel){
         return repository.findAll().stream()
                 .filter(livro -> autor == null || livro.getAutor().toLowerCase().contains(autor.toLowerCase()))
-                .map(livro -> LivroResponse.de(livro, livro.getQuantidadeTotal()))
+                .filter(livro -> disponivel == null || !disponivel || calcularDisponiveis(livro)> 0)
+                .map(livro -> LivroResponse.de(livro, calcularDisponiveis(livro)))
                 .toList();
     }
 
     public LivroResponse buscarPorId(Long id){
         LivroModel livro = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livro com ID " + id + " não encontrado."));
-        return LivroResponse.de(livro, livro.getQuantidadeTotal());
+        return LivroResponse.de(livro, calcularDisponiveis(livro));
     }
 
     public LivroResponse criar(LivroRequest livroRequest){
@@ -56,6 +60,16 @@ public class LivroService {
                 if(repository.existsByIsbnAndIdNot(request.isbn(), id)){
                     throw new IllegalStateException("O ISB " + request.isbn() + " já pertence a um livro.");
                 }
+                if (repository.existsByIsbnAndIdNot(request.isbn(), id)) {
+                    throw new IllegalStateException("O ISBN " + request.isbn() + " já pertence a outro livro.");
+                }
+
+                long emprestimosAtivos = emprestimoRepository.contarAtivosPorLivroId(id);
+                if (request.quantidadeTotal() < emprestimosAtivos) {
+                    throw new IllegalStateException(
+                            "A quantidade total (" + request.quantidadeTotal() + ") não pode ser menor que os empréstimos ativos (" + emprestimosAtivos + ")."
+                    );
+                }
                     livroExistente.setTitulo(request.titulo());
                     livroExistente.setAutor(request.autor());
                     livroExistente.setIsbn(request.isbn());
@@ -63,12 +77,20 @@ public class LivroService {
                     livroExistente.setQuantidadeTotal(request.quantidadeTotal());
 
                     LivroModel atualizado = repository.save(livroExistente);
-                    return LivroResponse.de(atualizado, atualizado.getQuantidadeTotal());
+                    return LivroResponse.de(atualizado, calcularDisponiveis(atualizado));
                 };
+    private int calcularDisponiveis(LivroModel livro) {
+        int ativos = (int) emprestimoRepository.contarAtivosPorLivroId(livro.getId());
+        return livro.getQuantidadeTotal() - ativos;
+    }
 
     public void remover (Long id){
         if(!repository.existsById(id)){
             throw new ResourceNotFoundException("Livro com ID " + id + " não encontrado para remoção.");
+        }
+
+        if(emprestimoRepository.existeEmprestimoAtivoPorLivroId(id)){
+            throw new IllegalStateException("Não é possível remover o livro ID " + id + " pois existem empréstimos ativos.");
         }
         repository.deleteById(id);
     }

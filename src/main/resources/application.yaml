@@ -1,3 +1,14 @@
 spring:
   application:
     name: api-biblioteca
+
+biblioteca:
+  politicas:
+    aluno:
+      limite-emprestimos: 3
+      prazo-dias: 7
+      multa-diaria: 1.00
+    professor:
+      limite-emprestimos: 5
+      prazo-dias: 14
+      multa-diaria: 0.50

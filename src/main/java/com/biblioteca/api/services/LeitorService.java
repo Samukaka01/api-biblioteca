@@ -5,6 +5,7 @@ import com.biblioteca.api.dto.responses.LeitorResponse;
 import com.biblioteca.api.exceptions.ResourceNotFoundException;
 import com.biblioteca.api.models.leitor.LeitorModel;
 import com.biblioteca.api.models.leitor.TipoLeitor;
+import com.biblioteca.api.repositorys.emprestimo.EmprestimoRepository;
 import com.biblioteca.api.repositorys.leitor.LeitorRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +15,11 @@ import java.util.List;
 public class LeitorService {
 
     private final LeitorRepository repository;
+    private final EmprestimoRepository  emprestimoRepository;
 
-    public LeitorService(LeitorRepository repository) {
+    public LeitorService(LeitorRepository repository, EmprestimoRepository emprestimoRepository) {
         this.repository = repository;
+        this.emprestimoRepository = emprestimoRepository;
     }
 
     public List<LeitorResponse> listar(String nome, TipoLeitor tipo) {
@@ -69,6 +72,10 @@ public class LeitorService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Leitor com ID " + id + " não encontrado.");
         }
+        if (emprestimoRepository.existeEmprestimoAtivoPorLivroId(id)) {
+            throw new IllegalStateException("Não é possível remover o livro ID " + id + " pois existem empréstimos ativos.");
+        }
+
         repository.deleteById(id);
     }
 }

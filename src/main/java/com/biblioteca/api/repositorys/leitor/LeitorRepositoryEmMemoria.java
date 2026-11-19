@@ -44,18 +44,6 @@ public class LeitorRepositoryEmMemoria implements LeitorRepository {
     }
 
     @Override
-    public boolean existsByNomeIgnoreCase(String nome){
-        return dados.values().stream()
-                .anyMatch(leitor -> leitor.getNome().equalsIgnoreCase(nome));
-    }
-
-    @Override
-    public boolean existsByNomeIgnoreCaseAndIdNot(String nome, Long id) {
-        return dados.values().stream()
-                .anyMatch(leitor -> leitor.getNome().equalsIgnoreCase(nome) && !leitor.getId().equals(id));
-    }
-
-    @Override
     public boolean existsByEmailIgnoreCase(String email){
         return dados.values().stream()
                 .anyMatch(leitor -> leitor.getEmail().equalsIgnoreCase(email));

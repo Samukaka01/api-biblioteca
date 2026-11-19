@@ -6,6 +6,7 @@ import com.biblioteca.api.services.LivroService;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -30,8 +31,8 @@ public class LivroController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LivroResponse> getById(@PathVariable Long id){
-        return ResponseEntity.of(livroService.buscarPorId(id));
+    public LivroResponse getById(@PathVariable Long id){
+        return livroService.buscarPorId(id);
     }
 
     @PostMapping
@@ -45,17 +46,15 @@ public class LivroController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LivroResponse> atualizar(
+    public LivroResponse atualizar(
             @PathVariable Long id,
             @RequestBody LivroRequest livroRequest){
-        return ResponseEntity.of(livroService.atualizar(id, livroRequest));
+        return livroService.atualizar(id, livroRequest);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<LivroResponse> remover(@PathVariable Long id){
-        if(!livroService.remover(id)){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void remover(@PathVariable Long id){
+        livroService.remover(id);
     }
 }

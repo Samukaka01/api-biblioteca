@@ -4,7 +4,10 @@ import com.biblioteca.api.dto.requests.LeitorRequest;
 import com.biblioteca.api.dto.responses.LeitorResponse;
 import com.biblioteca.api.models.leitor.TipoLeitor;
 import com.biblioteca.api.services.LeitorService;
+
 import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -30,8 +33,8 @@ public class LeitorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LeitorResponse> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.of(service.buscarPorId(id));
+    public LeitorResponse buscarPorId(@PathVariable Long id) {
+        return service.buscarPorId(id);
     }
 
     @PostMapping
@@ -45,17 +48,15 @@ public class LeitorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LeitorResponse> atualizar(
+    public LeitorResponse atualizar(
             @PathVariable Long id,
             @Valid @RequestBody LeitorRequest request) {
-        return ResponseEntity.of(service.atualizar(id, request));
+        return service.atualizar(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(@PathVariable Long id) {
-        if (!service.remover(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void remover(@PathVariable Long id) {
+        service.remover(id);
     }
 }

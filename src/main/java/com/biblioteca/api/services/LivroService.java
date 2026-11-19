@@ -4,6 +4,7 @@ import com.biblioteca.api.dto.requests.LivroRequest;
 import com.biblioteca.api.dto.responses.LivroResponse;
 import com.biblioteca.api.models.livro.LivroModel;
 import com.biblioteca.api.repositorys.livro.LivroRepository;
+import com.biblioteca.api.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,9 +26,10 @@ public class LivroService {
                 .toList();
     }
 
-    public Optional<LivroResponse> buscarPorId(Long id){
-        return repository.findById(id)
-                .map(livro -> LivroResponse.de(livro, livro.getQuantidadeTotal()));
+    public LivroResponse buscarPorId(Long id){
+        LivroModel livro = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Livro com ID " + id + " não encontrado."));
+        return LivroResponse.de(livro, livro.getQuantidadeTotal());
     }
 
     public LivroResponse criar(LivroRequest livroRequest){
@@ -48,13 +50,12 @@ public class LivroService {
         return LivroResponse.de(salvo, salvo.getQuantidadeTotal());
     }
 
-    public Optional<LivroResponse> atualizar (Long id, LivroRequest request){
-        return repository.findById(id)
-                .map(livroExistente ->{
-                    if(repository.existsByIsbnAndIdNot(request.isbn(), id)){
-                        throw new IllegalStateException("O ISB " + request.isbn() + " já pertence a um livro.");
-                    }
-
+    public LivroResponse atualizar (Long id, LivroRequest request){
+        LivroModel livroExistente = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Livro com ID " + id + " não encontrado para atualização."));
+                if(repository.existsByIsbnAndIdNot(request.isbn(), id)){
+                    throw new IllegalStateException("O ISB " + request.isbn() + " já pertence a um livro.");
+                }
                     livroExistente.setTitulo(request.titulo());
                     livroExistente.setAutor(request.autor());
                     livroExistente.setIsbn(request.isbn());
@@ -63,14 +64,12 @@ public class LivroService {
 
                     LivroModel atualizado = repository.save(livroExistente);
                     return LivroResponse.de(atualizado, atualizado.getQuantidadeTotal());
-                });
-    }
+                };
 
-    public boolean remover (Long id){
+    public void remover (Long id){
         if(!repository.existsById(id)){
-            return false;
+            throw new ResourceNotFoundException("Livro com ID " + id + " não encontrado para remoção.");
         }
         repository.deleteById(id);
-        return true;
     }
 }

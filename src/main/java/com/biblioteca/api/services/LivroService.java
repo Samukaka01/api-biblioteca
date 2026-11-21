@@ -9,7 +9,6 @@ import com.biblioteca.api.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LivroService {
@@ -25,7 +24,13 @@ public class LivroService {
     public List<LivroResponse> listar(String autor, Boolean disponivel){
         return repository.findAll().stream()
                 .filter(livro -> autor == null || livro.getAutor().toLowerCase().contains(autor.toLowerCase()))
-                .filter(livro -> disponivel == null || !disponivel || calcularDisponiveis(livro)> 0)
+                .filter(livro -> {
+                    if (disponivel == null) {
+                        return true;
+                    }
+                    int disponiveis = calcularDisponiveis(livro);
+                    return disponivel ? disponiveis > 0 : disponiveis == 0;
+                })
                 .map(livro -> LivroResponse.de(livro, calcularDisponiveis(livro)))
                 .toList();
     }
@@ -57,9 +62,6 @@ public class LivroService {
     public LivroResponse atualizar (Long id, LivroRequest request){
         LivroModel livroExistente = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livro com ID " + id + " não encontrado para atualização."));
-                if(repository.existsByIsbnAndIdNot(request.isbn(), id)){
-                    throw new IllegalStateException("O ISB " + request.isbn() + " já pertence a um livro.");
-                }
                 if (repository.existsByIsbnAndIdNot(request.isbn(), id)) {
                     throw new IllegalStateException("O ISBN " + request.isbn() + " já pertence a outro livro.");
                 }
@@ -78,7 +80,7 @@ public class LivroService {
 
                     LivroModel atualizado = repository.save(livroExistente);
                     return LivroResponse.de(atualizado, calcularDisponiveis(atualizado));
-                };
+                }
     private int calcularDisponiveis(LivroModel livro) {
         int ativos = (int) emprestimoRepository.contarAtivosPorLivroId(livro.getId());
         return livro.getQuantidadeTotal() - ativos;

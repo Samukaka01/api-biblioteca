@@ -72,8 +72,8 @@ public class LeitorService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Leitor com ID " + id + " não encontrado.");
         }
-        if (emprestimoRepository.existeEmprestimoAtivoPorLivroId(id)) {
-            throw new IllegalStateException("Não é possível remover o livro ID " + id + " pois existem empréstimos ativos.");
+        if (emprestimoRepository.existeEmprestimoAtivoPorLeitorId(id)) {
+            throw new IllegalStateException("Não é possível remover o leitor ID " + id + " pois existem empréstimos ativos.");
         }
 
         repository.deleteById(id);

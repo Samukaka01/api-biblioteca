@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.net.URI;
@@ -46,6 +47,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Parâmetro '" + ex.getName() + "' recebeu um valor inválido: " + ex.getValue()
+        );
+        problemDetail.setTitle("Parâmetro inválido");
+        problemDetail.setType(URI.create("https://api.biblioteca.com/erros/parametro-invalido"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleException(Exception ex){
         log.error("Erro inesperado", ex);
@@ -75,6 +89,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = ex.getBody();
         problem.setTitle("Erro de validação");
         problem.setDetail("Um ou mais campos estão inválidos");
+        problem.setType(URI.create("https://api.biblioteca.com/erros/validacao"));
+        problem.setProperty("timestamp", Instant.now());
         problem.setProperty("erros", errors);
 
         return ResponseEntity.badRequest().body(problem);
